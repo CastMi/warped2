@@ -26,12 +26,12 @@ public:
     Configuration(const std::string& model_description, int argc, const char* const* argv);
     Configuration(const std::string& model_description, int argc, const char* const* argv,
                   const std::vector<TCLAP::Arg*>& cmd_line_args);
-    Configuration(const std::string& config_file_name, unsigned int max_time);
+    Configuration(const std::string& config_file_name);
     ~Configuration();
 
     // Create a fully configured EventDispatcher
     std::unique_ptr<EventDispatcher>
-    makeDispatcher(std::shared_ptr<TimeWarpCommunicationManager> comm_manager);
+    makeDispatcher();
 
     // Create a partitioner based on the chosen configuration.
     std::unique_ptr<Partitioner> makePartitioner();
@@ -43,9 +43,6 @@ public:
     std::unique_ptr<Partitioner> makeLocalPartitioner(unsigned int node_id,
         unsigned int& num_schedulers);
 
-    // Create a communcation manager based on configurations
-    std::shared_ptr<TimeWarpCommunicationManager> makeCommunicationManager();
-
     bool checkTimeWarpConfigs(uint64_t local_config_id, uint64_t *all_config_ids,
         std::shared_ptr<TimeWarpCommunicationManager> comm_manager);
 
@@ -55,7 +52,6 @@ private:
     void readUserConfig();
 
     std::string config_file_name_;
-    unsigned int max_sim_time_;
     std::unique_ptr<Json::Value> root_;
 };
 

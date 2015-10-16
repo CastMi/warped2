@@ -6,13 +6,14 @@ lib_LTLIBRARIES = libwarped.la
 # (directly or indirectly) through warped.hpp. Keep all these source listings
 # sorted.
 WARPED_INSTALL_HPP_FILES = \
+	 src/VTime.hpp \
     src/Configuration.hpp \
     src/FileStream.hpp \
     src/Event.hpp \
     src/LogicalProcess.hpp \
     src/LPState.hpp \
     src/Partitioner.hpp \
-	src/RandomNumberGenerator.hpp \
+	 src/RandomNumberGenerator.hpp \
     src/serialization.hpp \
     src/Simulation.hpp \
     src/warped.hpp \
@@ -21,66 +22,29 @@ WARPED_INSTALL_HPP_FILES = \
 
 # All other headers are listed in this variable
 WARPED_NOINST_HPP_FILES = \
-    src/AggregateEventStatistics.hpp \
-    src/CommandLineConfiguration.hpp \
-    src/EventDispatcher.hpp \
-    src/EventStatistics.hpp \
-    src/IndividualEventStatistics.hpp \
-    src/LTSFQueue.hpp \
-    src/NullEventStatistics.hpp \
-    src/ProfileGuidedPartitioner.hpp \
-    src/RoundRobinPartitioner.hpp \
-    src/SequentialEventDispatcher.hpp \
-    src/STLLTSFQueue.hpp \
-    src/LadderQueue.hpp \
+   src/CommandLineConfiguration.hpp \
+   src/EventDispatcher.hpp \
+   src/LTSFQueue.hpp \
+   src/ProfileGuidedPartitioner.hpp \
+   src/RoundRobinPartitioner.hpp \
+   src/SequentialEventDispatcher.hpp \
+   src/STLLTSFQueue.hpp \
 	src/RandomNumberGenerator.hpp \
-    src/TimeWarpEventDispatcher.hpp \
-    src/utility/strings.hpp \
-	src/TicketLock.hpp \
-    src/TimeWarpMatternGVTManager.hpp \
-    src/TimeWarpKernelMessage.hpp \
-    src/TimeWarpCommunicationManager.hpp \
-    src/TimeWarpMPICommunicationManager.hpp \
-    src/TimeWarpStateManager.hpp \
-    src/TimeWarpPeriodicStateManager.hpp \
-    src/TimeWarpOutputManager.hpp \
-    src/TimeWarpAggressiveOutputManager.hpp \
-    src/TimeWarpFileStreamManager.hpp \
-    src/TimeWarpFileStream.hpp \
-    src/TimeWarpEventSet.hpp \
-	src/TimeWarpLocalGVTManager.hpp \
-	src/TimeWarpTerminationManager.hpp \
-	src/TimeWarpStatistics.hpp
+   src/utility/strings.hpp \
+	src/TicketLock.hpp
 
 # All cpp files are listed in this variable
 WARPED_CPP_FILES = \
-    src/AggregateEventStatistics.cpp \
+	 src/VTime.cpp \
     src/CommandLineConfiguration.cpp \
     src/Configuration.cpp \
-    src/EventStatistics.cpp \
-    src/IndividualEventStatistics.cpp \
+    src/FileStream.cpp \
     src/ProfileGuidedPartitioner.cpp \
     src/RoundRobinPartitioner.cpp \
     src/SequentialEventDispatcher.cpp \
     src/Simulation.cpp \
     src/STLLTSFQueue.cpp \
-    src/LadderQueue.cpp \
-    src/LogicalProcess.cpp \
-    src/TimeWarpEventDispatcher.cpp \
-    src/TimeWarpMatternGVTManager.cpp \
-    src/TimeWarpCommunicationManager.cpp \
-    src/TimeWarpMPICommunicationManager.cpp \
-    src/TimeWarpStateManager.cpp \
-    src/TimeWarpPeriodicStateManager.cpp \
-    src/TimeWarpOutputManager.cpp \
-    src/TimeWarpAggressiveOutputManager.cpp \
-    src/TimeWarpFileStreamManager.cpp \
-    src/FileStream.cpp \
-    src/TimeWarpFileStream.cpp \
-    src/TimeWarpEventSet.cpp \
-	src/TimeWarpLocalGVTManager.cpp \
-	src/TimeWarpTerminationManager.cpp \
-	src/TimeWarpStatistics.cpp
+    src/LogicalProcess.cpp
 
 libwarped_la_SOURCES = \
     $(WARPED_INSTALL_HPP_FILES) \

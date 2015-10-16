@@ -8,24 +8,19 @@
 
 namespace warped {
 
-class EventStatistics;
 class LogicalProcess;
 
 // This class is an EventDispatcher that runs on a single thread and process.
 class SequentialEventDispatcher : public EventDispatcher {
 public:
-    SequentialEventDispatcher(unsigned int max_sim_time, std::unique_ptr<EventStatistics> stats);
+    SequentialEventDispatcher();
 
-    void startSimulation(const std::vector<std::vector<LogicalProcess*>>& lps);
+    void startSimulation(const std::vector<LogicalProcess*>& lps);
 
     FileStream& getFileStream(LogicalProcess* lp, const std::string& filename,
         std::ios_base::openmode mode, std::shared_ptr<Event> this_event);
 
 private:
-    unsigned int current_sim_time_ = 0;
-
-    std::unique_ptr<EventStatistics> stats_;
-
     std::unordered_map<std::string, std::unique_ptr<FileStream, FileStreamDeleter>>
         file_stream_by_filename_;
 

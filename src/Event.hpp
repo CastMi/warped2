@@ -3,6 +3,7 @@
 
 #include <string>
 #include "serialization.hpp"
+#include "VTime.hpp"
 
 namespace warped {
 
@@ -17,7 +18,9 @@ enum class EventType : bool {
 // serializable. See serialization.hpp for info on serializing Events.
 class Event {
 public:
-    Event() = default;
+    Event() : send_time_(&VTime::getZero()) {};
+    Event(const VTime& send_time, const std::string sender_name) :
+       sender_name_(sender_name), send_time_(&send_time) {};
     virtual ~Event() {}
 
     bool operator== (const Event &other) {
@@ -54,7 +57,7 @@ public:
     virtual const std::string& receiverName() const = 0;
 
     // The timestamp of when the event should be received.
-    virtual unsigned int timestamp() const = 0;
+    virtual const VTime& timestamp() const = 0;
 
     // The name of the SimualtionObject that sends this event.
     std::string sender_name_;
@@ -63,48 +66,44 @@ public:
     EventType event_type_ = EventType::POSITIVE;
 
     // Send time
-    unsigned int send_time_ = 0;
+    const VTime* send_time_;
 
     // For differentiating same events which is caused by
     //  anti-message + regeneration of event.
     unsigned long long generation_ = 0;
 
-    WARPED_REGISTER_SERIALIZABLE_MEMBERS(sender_name_, event_type_, send_time_, generation_)
+    WARPED_REGISTER_SERIALIZABLE_MEMBERS(sender_name_, event_type_, generation_)
 
 };
 
 class NegativeEvent : public Event {
 public:
-    NegativeEvent() = default;
-    NegativeEvent(std::shared_ptr<Event> e) {
+    NegativeEvent() : receive_time_(&VTime::getZero()) {};
+    NegativeEvent(std::shared_ptr<Event> e) : 
+       Event(*e->send_time_, e->sender_name_), receive_time_(&(e->timestamp())) {
         receiver_name_ = e->receiverName();
-        receive_time_ = e->timestamp();
-        sender_name_ = e->sender_name_;
-        send_time_ = e->send_time_;
         event_type_ = EventType::NEGATIVE;
         generation_ = e->generation_;
     }
 
-    const std::string& receiverName() const {return receiver_name_;}
-    unsigned int timestamp() const {return receive_time_;}
+    const std::string& receiverName() const { return receiver_name_; }
+    const VTime& timestamp() const { return *receive_time_; }
 
     std::string receiver_name_;
-    unsigned int receive_time_;
+    const VTime* receive_time_;
 
-    WARPED_REGISTER_SERIALIZABLE_MEMBERS(cereal::base_class<Event>(this), receiver_name_, receive_time_)
+    WARPED_REGISTER_SERIALIZABLE_MEMBERS(cereal::base_class<Event>(this), receiver_name_)
 };
 
 // Initial event used with the initial state save of all objects
 class InitialEvent : public Event {
 public:
-    InitialEvent() {
-        sender_name_ = "";
-        send_time_ = 0;
+    InitialEvent() : Event(VTime::getZero(), "") {
         generation_ = 0;
    }
 
     const std::string& receiverName() const { return receiver_name_; }
-    unsigned int timestamp() const { return 0; }
+    const VTime& timestamp() const { return VTime::getZero(); }
 
     std::string receiver_name_ = "";
 };
@@ -125,7 +124,6 @@ public:
                         ((first->event_type_ < second->event_type_) ? true :
                         ((first->event_type_ != second->event_type_) ? false : false)))))))));
     }
-
 };
 
 } // namespace warped

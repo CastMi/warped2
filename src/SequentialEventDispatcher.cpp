@@ -9,7 +9,6 @@
 
 #include "Event.hpp"
 #include "EventDispatcher.hpp"
-#include "EventStatistics.hpp"
 #include "LogicalProcess.hpp"
 #include "STLLTSFQueue.hpp"
 #include "utility/memory.hpp"
@@ -17,56 +16,46 @@
 
 namespace warped {
 
-SequentialEventDispatcher::SequentialEventDispatcher(unsigned int max_sim_time,
-                                                     std::unique_ptr<EventStatistics> stats)
-    : EventDispatcher(max_sim_time), stats_(std::move(stats)) {}
+SequentialEventDispatcher::SequentialEventDispatcher()
+    : EventDispatcher() {}
 
 void SequentialEventDispatcher::startSimulation(
-    const std::vector<std::vector<LogicalProcess*>>& lps) {
-    if (lps.size() != 1) {
-        throw std::runtime_error(std::string("Sequential simulation only supports 1 partition."));
+    const std::vector<LogicalProcess*>& lps) {
+    if (lps.size() <= 1) {
+        throw std::runtime_error(std::string("Simulation should contain at least 2 elements."));
     }
 
     std::unordered_map<std::string, LogicalProcess*> lps_by_name;
     STLLTSFQueue events;
-    current_sim_time_ = 0;
 
-    for (auto& lp : lps[0]) {
+    for (auto& lp : lps) {
         auto new_events = lp->initializeLP();
-        std::vector<std::shared_ptr<warped::Event>> valid_events;
         for (auto& e : new_events) {
             if (e->timestamp() > max_sim_time_) continue;
-            e->send_time_ = 0;
+            e->send_time_ = &VTime::getZero();
             e->sender_name_ = lp->name_;
             e->generation_ = lp->generation_++;
             events.push(e);
-            valid_events.push_back(e);
         }
-        stats_->record(lp->name_, current_sim_time_, valid_events);
         lps_by_name[lp->name_] = lp;
     }
 
     int count = 0;
     while (!events.empty()) {
         auto event = events.pop();
-        current_sim_time_ = event->timestamp();
         auto receiver = lps_by_name[event->receiverName()];
         auto new_events = receiver->receiveEvent(*event.get());
-        std::vector<std::shared_ptr<warped::Event>> valid_events;
         for (auto& e : new_events) {
             if (e->timestamp() > max_sim_time_) continue;
             e->sender_name_ = receiver->name_;
-            e->send_time_   = event->timestamp();
+            e->send_time_   = &event->timestamp();
             e->generation_ = receiver->generation_++;
             events.push(e);
-            valid_events.push_back(e);
         }
         count++;
-        stats_->record(event->receiverName(), current_sim_time_, valid_events);
     }
 
     std::cout << "Events processed: " << count << std::endl;
-    stats_->writeToFile();
 }
 
 FileStream& SequentialEventDispatcher::getFileStream(LogicalProcess* lp,
