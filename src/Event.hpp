@@ -18,9 +18,7 @@ enum class EventType : bool {
 // serializable. See serialization.hpp for info on serializing Events.
 class Event {
 public:
-    Event() : send_time_(&VTime::getZero()) {};
-    Event(const VTime& send_time, const std::string sender_name) :
-       sender_name_(sender_name), send_time_(&send_time) {};
+    Event(EventType type = EventType::POSITIVE) : event_type_(type), generation_(0) {};
     virtual ~Event() {}
 
     bool operator== (const Event &other) {
@@ -63,14 +61,14 @@ public:
     std::string sender_name_;
 
     // Event type - positive or negative
-    EventType event_type_ = EventType::POSITIVE;
+    EventType event_type_;
 
     // Send time
     const VTime* send_time_;
 
     // For differentiating same events which is caused by
     //  anti-message + regeneration of event.
-    unsigned long long generation_ = 0;
+    unsigned long long generation_;
 
     WARPED_REGISTER_SERIALIZABLE_MEMBERS(sender_name_, event_type_, generation_)
 
@@ -79,8 +77,8 @@ public:
 class NegativeEvent : public Event {
 public:
     NegativeEvent() : receive_time_(&VTime::getZero()) {};
-    NegativeEvent(std::shared_ptr<Event> e) : 
-       Event(*e->send_time_, e->sender_name_), receive_time_(&(e->timestamp())) {
+    NegativeEvent(std::shared_ptr<Event> e) {
+        receive_time_ = &(e->timestamp());
         receiver_name_ = e->receiverName();
         event_type_ = EventType::NEGATIVE;
         generation_ = e->generation_;
@@ -98,8 +96,7 @@ public:
 // Initial event used with the initial state save of all objects
 class InitialEvent : public Event {
 public:
-    InitialEvent() : Event(VTime::getZero(), "") {
-        generation_ = 0;
+    InitialEvent() {
    }
 
     const std::string& receiverName() const { return receiver_name_; }
